@@ -29,6 +29,8 @@ namespace Events.IO.Domain.Events
             CompanyName = companyName;
         }
 
+        private Occasion() { } // used in the OccasionFactory
+
         public string Name { get; private set; }
         public string ShortDescription { get; private set; }
         public string LongDescription { get; private set; }
@@ -132,5 +134,42 @@ namespace Events.IO.Domain.Events
                 .Length(2, 150).WithMessage("The company name must be between 2 to 150 characters");
         }
         #endregion 
+
+        public static class OccasionFactory
+        {
+            public static Occasion NewOccasionComplete(
+                Guid id,
+                string name,
+                string shortDescription,
+                string longDescription,
+                DateTime startDate,
+                DateTime endDate,
+                bool free,
+                decimal value,
+                bool online,
+                string companyName,
+                Guid? organizerId)
+            {
+                var occasion = new Occasion
+                {
+                    Id = id,
+                    ShortDescription = shortDescription,
+                    LongDescription = longDescription,
+                    Name = name,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Free = free,
+                    Value = value,
+                    Online = online,
+                    CompanyName = companyName
+                };
+
+                if (organizerId != null)
+                    occasion.Organizer = new Organizer(organizerId.Value);
+
+                return occasion;
+            }
+        }
+
     }
 }
