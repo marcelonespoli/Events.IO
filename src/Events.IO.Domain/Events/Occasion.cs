@@ -43,11 +43,35 @@ namespace Events.IO.Domain.Events
         public bool Excluded { get; private set; }
         public ICollection<Tags> Tags { get; private set; }
 
+        // used to create relation between the tables  
+        public Guid? CategoryId { get; private set; }
+        public Guid? AddressId { get; private set; }
+        public Guid OrganizerId { get; private set; }
 
-        public Category Category { get; private set; }
-        public Address Address { get; private set; }
-        public Organizer Organizer { get; private set; }
 
+        // EF properties of navegation (let them vertual)
+        public virtual Category Category { get; private set; }
+        public virtual Address Address { get; private set; }
+        public virtual Organizer Organizer { get; private set; }
+
+
+        public void AddAddress(Address address)
+        {
+            if (!address.IsValid()) return;
+            Address = address;
+        }
+
+        public void AddCotegory(Category category)
+        {
+            if (!category.IsValid()) return;
+            Category = category;
+        }
+
+        public void ExcludeOccasion()
+        {
+            //TODO business validation
+            Excluded = true;
+        }
 
         public override bool IsValid()
         {
@@ -62,9 +86,12 @@ namespace Events.IO.Domain.Events
             ValidateValue();
             ValidateStartDate();
             ValidateEndDate();
-            ValidateAddress();
+            ValidateOnline();
             ValidateCompanyName(); 
             ValidationResult = Validate(this);
+
+            // Adicional validations
+            ValidateAddress();
         }
 
         private void ValidateName()
@@ -114,7 +141,7 @@ namespace Events.IO.Domain.Events
                     .WithMessage("If there is a start date please inform the end date");
         }
 
-        private void ValidateAddress()
+        private void ValidateOnline()
         {
             if (Online)
                 RuleFor(p => p.Address)
@@ -133,6 +160,17 @@ namespace Events.IO.Domain.Events
                 .NotEmpty().WithMessage("The organizer name need to be informed")
                 .Length(2, 150).WithMessage("The company name must be between 2 to 150 characters");
         }
+
+        private void ValidateAddress()
+        {
+            if (Online) return;
+            if (Address.IsValid()) return;
+
+            foreach (var item in Address.ValidationResult.Errors)
+            {
+                ValidationResult.Errors.Add(item);
+            }
+        }
         #endregion 
 
         public static class OccasionFactory
@@ -148,7 +186,9 @@ namespace Events.IO.Domain.Events
                 decimal value,
                 bool online,
                 string companyName,
-                Guid? organizerId)
+                Guid? organizerId,
+                Address address,
+                Guid categoryId)
             {
                 var occasion = new Occasion
                 {
@@ -161,11 +201,16 @@ namespace Events.IO.Domain.Events
                     Free = free,
                     Value = value,
                     Online = online,
-                    CompanyName = companyName
+                    CompanyName = companyName,
+                    Address = address,
+                    CategoryId = categoryId
                 };
 
                 if (organizerId != null)
                     occasion.Organizer = new Organizer(organizerId.Value);
+
+                if (online)
+                    occasion.Address = null;
 
                 return occasion;
             }

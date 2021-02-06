@@ -34,7 +34,9 @@ namespace Events.IO.Domain.Events.Handlers
 
         public Task<bool> Handle(RegisterEventCommand message, CancellationToken cancellationToken)
         {
-            var occasion = new Occasion(message.Name, message.StartDate, message.EndDate, message.Free, message.Value, message.Online, message.CompanyName);
+            var occasion = Occasion.OccasionFactory.NewOccasionComplete(message.Id, message.Name, message.ShortDescription,
+                message.LongDescription, message.StartDate, message.EndDate, message.Free, message.Value,
+                message.Online, message.CompanyName, message.OrganizerId, message.Address, message.Category.Id); 
 
             if (!IsEventValid(occasion)) return Task.FromResult(false);
             
@@ -53,11 +55,15 @@ namespace Events.IO.Domain.Events.Handlers
 
         public Task<bool> Handle(UpdateEventCommand message, CancellationToken cancellationToken)
         {
+            var currentEvent = _eventRepository.GetById(message.Id);
+
             if (!ExistsEvent(message.Id, message.MessageType)) return Task.FromResult(false);
 
-            var occasion = Occasion.OccasionFactory.NewOccasionComplete(message.Id, message.Name, message.ShortDescription, 
-                message.LongDescription, message.StartDate, message.EndDate, message.Free, message.Value, 
-                message.Online, message.CompanyName, null);
+            //TODO validate if the event below the organizer
+
+            var occasion = Occasion.OccasionFactory.NewOccasionComplete(message.Id, message.Name, message.ShortDescription,
+                message.LongDescription, message.StartDate, message.EndDate, message.Free, message.Value,
+                message.Online, message.CompanyName, message.OrganizerId, currentEvent.Address, message.Category.Id); 
 
             if (!IsEventValid(occasion)) return Task.FromResult(false); 
             
