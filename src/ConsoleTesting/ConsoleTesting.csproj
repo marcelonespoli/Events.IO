@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MediatR" Version="9.0.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="SimpleInjector" Version="5.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Events.IO.Domain\Events.IO.Domain.csproj" />
   </ItemGroup>
 
