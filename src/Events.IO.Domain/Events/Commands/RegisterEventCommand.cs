@@ -10,7 +10,10 @@ namespace Events.IO.Domain.Events.Commands
             bool free,
             decimal value,
             bool online,
-            string companyName)
+            string companyName,
+            Guid organizerId,
+            Address address,
+            Category category)
         {
             Name = name;
             StartDate = startDate;
@@ -19,6 +22,9 @@ namespace Events.IO.Domain.Events.Commands
             Value = value;
             Online = online;
             CompanyName = companyName;
+            OrganizerId = organizerId;
+            Address = address;
+            Category = category;
         }
     }
 }
